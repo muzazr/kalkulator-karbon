@@ -42,30 +42,30 @@ class FeaturePage extends StatelessWidget {
                 runSpacing: 15,
                 children: [
                   CalculatorCategory(
-                      imagePath: 'assets/images/air_conditioner.png',
-                      nameCategory: 'AC (Pendingin Ruangan)',
-                      page: CalculatorPage.airConditioner,
-                      ),
+                    imagePath: 'assets/images/air_conditioner.png',
+                    nameCategory: 'AC (Pendingin Ruangan)',
+                    page: CalculatorPage.airConditioner,
+                  ),
                   CalculatorCategory(
-                      imagePath: 'assets/images/fuel.png',
-                      nameCategory: 'Bahan Bakar Industri',
-                      page: CalculatorPage.fuelIndustry,
-                      ),
+                    imagePath: 'assets/images/fuel.png',
+                    nameCategory: 'Bahan Bakar Industri',
+                    page: CalculatorPage.fuelIndustry,
+                  ),
                   CalculatorCategory(
-                      imagePath: 'assets/images/car.png',
-                      nameCategory: 'Kendaraan',
-                      page: CalculatorPage.vehicle,
-                      ),
+                    imagePath: 'assets/images/car.png',
+                    nameCategory: 'Kendaraan',
+                    page: CalculatorPage.vehicle,
+                  ),
                   CalculatorCategory(
-                      imagePath: 'assets/images/electric_factory.png',
-                      nameCategory: 'Konsumsi Wilayah Listrik',
-                      page: CalculatorPage.electricArea,
-                      ),
+                    imagePath: 'assets/images/electric_factory.png',
+                    nameCategory: 'Konsumsi Wilayah Listrik',
+                    page: CalculatorPage.electricArea,
+                  ),
                   CalculatorCategory(
-                      imagePath: 'assets/images/lightbulb.png',
-                      nameCategory: 'Peralatan Listrik',
-                      page: CalculatorPage.electricTool,
-                      ),
+                    imagePath: 'assets/images/lightbulb.png',
+                    nameCategory: 'Peralatan Listrik',
+                    page: CalculatorPage.electricTool,
+                  ),
                 ],
               ),
             )
@@ -134,18 +134,20 @@ void navigateTo(CalculatorPage page) {
 
   switch (page) {
     case CalculatorPage.airConditioner:
-      Get.to(() => AirConditionerCalculator());
+      Get.to(() => const AirConditionerCalculator());
       break;
     case CalculatorPage.electricArea:
-      Get.to(() => ElectricArea());
+      Get.to(() => const ElectricArea());
       break;
     case CalculatorPage.electricTool:
-      Get.to(() => ElectricTool());
+      Get.to(() => const ElectricTool());
       break;
     case CalculatorPage.fuelIndustry:
-      Get.to(() => FuelIndustry());
+      Get.to(() => const FuelIndustry());
+      break;
     case CalculatorPage.vehicle:
-      Get.to(() => Vehicle());
+      Get.to(() => const Vehicle());
+      break;
   }
 }
 
@@ -155,7 +157,10 @@ class CalculatorCategory extends StatelessWidget {
   final CalculatorPage page;
 
   const CalculatorCategory(
-      {super.key, required this.imagePath, required this.nameCategory, required this.page});
+      {super.key,
+      required this.imagePath,
+      required this.nameCategory,
+      required this.page});
 
   @override
   Widget build(BuildContext context) {
