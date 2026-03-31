@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:project_based_learning_eco_apps/pages/home.dart';
 
 import 'air_conditioner.dart';
-import 'electric_area.dart';
 import 'electric_tool.dart';
 import 'fuel_industry.dart';
 import 'vehicle.dart';
@@ -36,10 +35,13 @@ class FeaturePage extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 8, right: 8),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 15,
-                runSpacing: 15,
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: 1.2,
                 children: [
                   CalculatorCategory(
                     imagePath: 'assets/images/air_conditioner.png',
@@ -55,11 +57,6 @@ class FeaturePage extends StatelessWidget {
                     imagePath: 'assets/images/car.png',
                     nameCategory: 'Kendaraan',
                     page: CalculatorPage.vehicle,
-                  ),
-                  CalculatorCategory(
-                    imagePath: 'assets/images/electric_factory.png',
-                    nameCategory: 'Konsumsi Wilayah Listrik',
-                    page: CalculatorPage.electricArea,
                   ),
                   CalculatorCategory(
                     imagePath: 'assets/images/lightbulb.png',
@@ -120,7 +117,6 @@ enum CalculatorPage {
   airConditioner,
   fuelIndustry,
   vehicle,
-  electricArea,
   electricTool
 }
 
@@ -135,9 +131,6 @@ void navigateTo(CalculatorPage page) {
   switch (page) {
     case CalculatorPage.airConditioner:
       Get.to(() => const AirConditionerCalculator());
-      break;
-    case CalculatorPage.electricArea:
-      Get.to(() => const ElectricArea());
       break;
     case CalculatorPage.electricTool:
       Get.to(() => const ElectricTool());
