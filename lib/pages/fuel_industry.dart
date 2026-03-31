@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'calculator_shared_widgets.dart';
 
-class FuelIndustry extends StatelessWidget {
+final AutoDisposeChangeNotifierProvider<FuelIndustryCalculatorController>
+    fuelIndustryControllerProvider =
+    ChangeNotifierProvider.autoDispose<FuelIndustryCalculatorController>(
+  (ref) => FuelIndustryCalculatorController(),
+);
+
+class FuelIndustry extends ConsumerWidget {
   const FuelIndustry({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final FuelIndustryCalculatorController controller =
-        Get.put(FuelIndustryCalculatorController());
+        ref.watch(fuelIndustryControllerProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFEFEFE),
@@ -36,25 +42,21 @@ class FuelIndustry extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 25),
-                    Obx(
-                      () => CalculatorDropdownField(
-                        label: 'Jenis bahan bakar',
-                        hint: 'Pilih jenis bahan bakar',
-                        value: controller.selectedFuelType.value,
-                        items: controller.fuelTypes,
-                        onChanged: controller.onFuelTypeChanged,
-                      ),
+                    CalculatorDropdownField(
+                      label: 'Jenis bahan bakar',
+                      hint: 'Pilih jenis bahan bakar',
+                      value: controller.selectedFuelType,
+                      items: controller.fuelTypes,
+                      onChanged: controller.onFuelTypeChanged,
                     ),
                     const SizedBox(height: 20),
-                    Obx(
-                      () => CalculatorTextField(
-                        label: 'Konsumsi bahan bakar per hari',
-                        hint: 'Masukkan konsumsi per hari',
-                        suffix: controller.selectedFuelUnit,
-                        controller: controller.konsumsiPerHariController,
-                        allowDecimal: true,
-                        maxLength: 12,
-                      ),
+                    CalculatorTextField(
+                      label: 'Konsumsi bahan bakar per hari',
+                      hint: 'Masukkan konsumsi per hari',
+                      suffix: controller.selectedFuelUnit,
+                      controller: controller.konsumsiPerHariController,
+                      allowDecimal: true,
+                      maxLength: 12,
                     ),
                     const SizedBox(height: 20),
                     CalculatorTextField(
@@ -94,6 +96,7 @@ class FuelIndustry extends StatelessWidget {
                       harian: controller.hasilCO2Harian,
                       mingguan: controller.hasilCO2Mingguan,
                       bulanan: controller.hasilCO2Bulanan,
+                      onTabChanged: controller.updateTab,
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -115,7 +118,7 @@ class FuelIndustry extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: controller.hitungJejakKarbon,
+                  onPressed: () => controller.hitungJejakKarbon(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF018D58),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -141,7 +144,7 @@ class FuelIndustry extends StatelessWidget {
   }
 }
 
-class FuelIndustryCalculatorController extends GetxController {
+class FuelIndustryCalculatorController extends ChangeNotifier {
   static const Map<String, double> _faktorEmisiBahanBakar = {
     'bensin': 2.24,
     'solar': 2.69,
@@ -163,44 +166,45 @@ class FuelIndustryCalculatorController extends GetxController {
   final TextEditingController jumlahUnitController = TextEditingController();
   final TextEditingController hariOperasiController = TextEditingController();
 
-  final RxnString selectedFuelType = RxnString();
-  final RxDouble hasilCO2Harian = 0.0.obs;
-  final RxDouble hasilCO2Mingguan = 0.0.obs;
-  final RxDouble hasilCO2Bulanan = 0.0.obs;
-  final RxString selectedTab = 'Hari'.obs;
-  final RxBool showResult = false.obs;
+  String? selectedFuelType;
+  double hasilCO2Harian = 0.0;
+  double hasilCO2Mingguan = 0.0;
+  double hasilCO2Bulanan = 0.0;
+  String selectedTab = 'Hari';
+  bool showResult = false;
 
   List<String> get fuelTypes => _faktorEmisiBahanBakar.keys.toList();
 
   String get selectedFuelUnit {
-    final String? fuelType = selectedFuelType.value;
+    final String? fuelType = selectedFuelType;
     if (fuelType == null) {
       return 'liter';
     }
-
     return _satuanBahanBakar[fuelType] ?? 'liter';
   }
 
   void onFuelTypeChanged(String? value) {
-    selectedFuelType.value = value;
+    selectedFuelType = value;
+    notifyListeners();
+  }
+
+  void updateTab(String tab) {
+    selectedTab = tab;
+    notifyListeners();
   }
 
   double? _parseNumber(String value) {
     return double.tryParse(value.trim().replaceAll(',', '.'));
   }
 
-  void _showError(String message) {
-    Get.snackbar(
-      'ERROR!',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.shade100,
-      colorText: Colors.black,
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red.shade600),
     );
   }
 
-  void hitungJejakKarbon() {
-    final String? fuelType = selectedFuelType.value;
+  void hitungJejakKarbon(BuildContext context) {
+    final String? fuelType = selectedFuelType;
     final String konsumsiText = konsumsiPerHariController.text.trim();
     final String jumlahUnitText = jumlahUnitController.text.trim();
     final String hariOperasiText = hariOperasiController.text.trim();
@@ -209,7 +213,7 @@ class FuelIndustryCalculatorController extends GetxController {
         konsumsiText.isEmpty ||
         jumlahUnitText.isEmpty ||
         hariOperasiText.isEmpty) {
-      _showError('Semua field harus diisi!');
+      _showError(context, 'Semua field harus diisi!');
       return;
     }
 
@@ -218,22 +222,22 @@ class FuelIndustryCalculatorController extends GetxController {
     final int? hariOperasi = int.tryParse(hariOperasiText);
 
     if (konsumsiPerHari == null || jumlahUnit == null || hariOperasi == null) {
-      _showError('Angka yang dimasukkan tidak valid.');
+      _showError(context, 'Angka yang dimasukkan tidak valid.');
       return;
     }
 
     if (konsumsiPerHari <= 0) {
-      _showError('Konsumsi per hari harus lebih dari 0.');
+      _showError(context, 'Konsumsi per hari harus lebih dari 0.');
       return;
     }
 
     if (jumlahUnit < 1) {
-      _showError('Jumlah unit minimal 1.');
+      _showError(context, 'Jumlah unit minimal 1.');
       return;
     }
 
     if (hariOperasi < 1 || hariOperasi > 31) {
-      _showError('Hari operasi per bulan harus antara 1 sampai 31.');
+      _showError(context, 'Hari operasi per bulan harus antara 1 sampai 31.');
       return;
     }
 
@@ -243,18 +247,19 @@ class FuelIndustryCalculatorController extends GetxController {
     final double emisiHarian = emisiBulanan / hariOperasi;
     final double emisiMingguan = emisiHarian * 7;
 
-    hasilCO2Harian.value = emisiHarian;
-    hasilCO2Mingguan.value = emisiMingguan;
-    hasilCO2Bulanan.value = emisiBulanan;
-    selectedTab.value = 'Hari';
-    showResult.value = true;
+    hasilCO2Harian = emisiHarian;
+    hasilCO2Mingguan = emisiMingguan;
+    hasilCO2Bulanan = emisiBulanan;
+    selectedTab = 'Hari';
+    showResult = true;
+    notifyListeners();
   }
 
   @override
-  void onClose() {
+  void dispose() {
     konsumsiPerHariController.dispose();
     jumlahUnitController.dispose();
     hariOperasiController.dispose();
-    super.onClose();
+    super.dispose();
   }
 }

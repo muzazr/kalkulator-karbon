@@ -107,12 +107,7 @@ class HeaderFeaturePage extends StatelessWidget {
   }
 }
 
-enum CalculatorPage {
-  airConditioner,
-  fuelIndustry,
-  vehicle,
-  electricTool
-}
+enum CalculatorPage { airConditioner, fuelIndustry, vehicle, electricTool }
 
 class CalculatorCategory extends StatelessWidget {
   final String imagePath;
@@ -160,8 +155,8 @@ class CalculatorCategory extends StatelessWidget {
                 flex: 6,
                 child: Image.asset(
                   imagePath,
-                  height: 50,
-                  width: 50,
+                  height: 65,
+                  width: 65,
                 ),
               ),
               Expanded(
@@ -170,7 +165,7 @@ class CalculatorCategory extends StatelessWidget {
                   nameCategory,
                   textAlign: TextAlign.center,
                   softWrap: true,
-                  style: TextStyle(fontSize: 10),
+                  style: TextStyle(fontSize: 13),
                 ),
               )
             ],

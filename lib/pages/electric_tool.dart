@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'calculator_shared_widgets.dart';
 
-class ElectricTool extends StatelessWidget {
+final AutoDisposeChangeNotifierProvider<ElectricToolCalculatorController>
+    electricToolControllerProvider =
+    ChangeNotifierProvider.autoDispose<ElectricToolCalculatorController>(
+  (ref) => ElectricToolCalculatorController(),
+);
+
+class ElectricTool extends ConsumerWidget {
   const ElectricTool({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ElectricToolCalculatorController controller =
-        Get.put(ElectricToolCalculatorController());
+        ref.watch(electricToolControllerProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFEFEFE),
@@ -99,6 +105,7 @@ class ElectricTool extends StatelessWidget {
                       harian: controller.hasilCO2Harian,
                       mingguan: controller.hasilCO2Mingguan,
                       bulanan: controller.hasilCO2Bulanan,
+                      onTabChanged: controller.updateTab,
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -120,7 +127,7 @@ class ElectricTool extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: controller.hitungJejakKarbon,
+                  onPressed: () => controller.hitungJejakKarbon(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF018D58),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -146,34 +153,35 @@ class ElectricTool extends StatelessWidget {
   }
 }
 
-class ElectricToolCalculatorController extends GetxController {
+class ElectricToolCalculatorController extends ChangeNotifier {
   final TextEditingController namaPeralatanController = TextEditingController();
   final TextEditingController dayaWattController = TextEditingController();
   final TextEditingController jumlahUnitController = TextEditingController();
   final TextEditingController jamPerHariController = TextEditingController();
   final TextEditingController hariPerBulanController = TextEditingController();
 
-  final RxDouble hasilCO2Harian = 0.0.obs;
-  final RxDouble hasilCO2Mingguan = 0.0.obs;
-  final RxDouble hasilCO2Bulanan = 0.0.obs;
-  final RxString selectedTab = 'Hari'.obs;
-  final RxBool showResult = false.obs;
+  double hasilCO2Harian = 0.0;
+  double hasilCO2Mingguan = 0.0;
+  double hasilCO2Bulanan = 0.0;
+  String selectedTab = 'Hari';
+  bool showResult = false;
+
+  void updateTab(String tab) {
+    selectedTab = tab;
+    notifyListeners();
+  }
 
   double? _parseNumber(String value) {
     return double.tryParse(value.trim().replaceAll(',', '.'));
   }
 
-  void _showError(String message) {
-    Get.snackbar(
-      'ERROR!',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.shade100,
-      colorText: Colors.black,
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red.shade600),
     );
   }
 
-  void hitungJejakKarbon() {
+  void hitungJejakKarbon(BuildContext context) {
     final String namaPeralatan = namaPeralatanController.text.trim();
     final String dayaWattText = dayaWattController.text.trim();
     final String jumlahUnitText = jumlahUnitController.text.trim();
@@ -185,7 +193,7 @@ class ElectricToolCalculatorController extends GetxController {
         jumlahUnitText.isEmpty ||
         jamPerHariText.isEmpty ||
         hariPerBulanText.isEmpty) {
-      _showError('Semua field harus diisi!');
+      _showError(context, 'Semua field harus diisi!');
       return;
     }
 
@@ -198,27 +206,27 @@ class ElectricToolCalculatorController extends GetxController {
         jumlahUnit == null ||
         jamPerHari == null ||
         hariPerBulan == null) {
-      _showError('Angka yang dimasukkan tidak valid.');
+      _showError(context, 'Angka yang dimasukkan tidak valid.');
       return;
     }
 
     if (dayaWatt <= 0) {
-      _showError('Daya listrik harus lebih dari 0.');
+      _showError(context, 'Daya listrik harus lebih dari 0.');
       return;
     }
 
     if (jumlahUnit < 1) {
-      _showError('Jumlah unit minimal 1.');
+      _showError(context, 'Jumlah unit minimal 1.');
       return;
     }
 
     if (jamPerHari <= 0 || jamPerHari > 24) {
-      _showError('Jam per hari harus lebih dari 0 dan maksimal 24.');
+      _showError(context, 'Jam per hari harus lebih dari 0 dan maksimal 24.');
       return;
     }
 
     if (hariPerBulan < 1 || hariPerBulan > 31) {
-      _showError('Hari per bulan harus antara 1 sampai 31.');
+      _showError(context, 'Hari per bulan harus antara 1 sampai 31.');
       return;
     }
 
@@ -229,20 +237,21 @@ class ElectricToolCalculatorController extends GetxController {
     final double emisiHarian = emisiBulanan / hariPerBulan;
     final double emisiMingguan = emisiHarian * 7;
 
-    hasilCO2Harian.value = emisiHarian;
-    hasilCO2Mingguan.value = emisiMingguan;
-    hasilCO2Bulanan.value = emisiBulanan;
-    selectedTab.value = 'Hari';
-    showResult.value = true;
+    hasilCO2Harian = emisiHarian;
+    hasilCO2Mingguan = emisiMingguan;
+    hasilCO2Bulanan = emisiBulanan;
+    selectedTab = 'Hari';
+    showResult = true;
+    notifyListeners();
   }
 
   @override
-  void onClose() {
+  void dispose() {
     namaPeralatanController.dispose();
     dayaWattController.dispose();
     jumlahUnitController.dispose();
     jamPerHariController.dispose();
     hariPerBulanController.dispose();
-    super.onClose();
+    super.dispose();
   }
 }

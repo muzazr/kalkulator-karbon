@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 class FeatureCalculatorHeader extends StatelessWidget {
@@ -227,11 +226,12 @@ class CalculatorDropdownField extends StatelessWidget {
 }
 
 class CarbonResultCard extends StatelessWidget {
-  final RxBool showResult;
-  final RxString selectedTab;
-  final RxDouble harian;
-  final RxDouble mingguan;
-  final RxDouble bulanan;
+  final bool showResult;
+  final String selectedTab;
+  final double harian;
+  final double mingguan;
+  final double bulanan;
+  final ValueChanged<String> onTabChanged;
 
   const CarbonResultCard({
     super.key,
@@ -240,16 +240,17 @@ class CarbonResultCard extends StatelessWidget {
     required this.harian,
     required this.mingguan,
     required this.bulanan,
+    required this.onTabChanged,
   });
 
   double _selectedValue(String tab) {
     switch (tab) {
       case 'Hari':
-        return harian.value;
+        return harian;
       case 'Minggu':
-        return mingguan.value;
+        return mingguan;
       case 'Bulan':
-        return bulanan.value;
+        return bulanan;
       default:
         return 0.0;
     }
@@ -257,84 +258,80 @@ class CarbonResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (!showResult.value) {
-        return const SizedBox.shrink();
-      }
+    if (!showResult) {
+      return const SizedBox.shrink();
+    }
 
-      final String activeTab = selectedTab.value;
-      final double resultValue = _selectedValue(activeTab);
+    final String activeTab = selectedTab;
+    final double resultValue = _selectedValue(activeTab);
 
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: const Color(0xFF018D58), width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Jejak Karbonmu',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFF018D58), width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Jejak Karbonmu',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildTabButton('Hari')),
+              const SizedBox(width: 8),
+              Expanded(child: _buildTabButton('Minggu')),
+              const SizedBox(width: 8),
+              Expanded(child: _buildTabButton('Bulan')),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              '${resultValue.toStringAsFixed(2)} Kg CO2',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF018D58),
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: _buildTabButton('Hari')),
-                const SizedBox(width: 8),
-                Expanded(child: _buildTabButton('Minggu')),
-                const SizedBox(width: 8),
-                Expanded(child: _buildTabButton('Bulan')),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: Text(
-                '${resultValue.toStringAsFixed(2)} Kg CO2',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF018D58),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTabButton(String tab) {
-    return Obx(() {
-      final bool isSelected = selectedTab.value == tab;
+    final bool isSelected = selectedTab == tab;
 
-      return InkWell(
-        onTap: () => selectedTab.value = tab,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF018D58) : Colors.white,
-            border: Border.all(color: const Color(0xFF018D58), width: 1),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Center(
-            child: Text(
-              tab,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF018D58),
-              ),
+    return InkWell(
+      onTap: () => onTabChanged(tab),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF018D58) : Colors.white,
+          border: Border.all(color: const Color(0xFF018D58), width: 1),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Center(
+          child: Text(
+            tab,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isSelected ? Colors.white : const Color(0xFF018D58),
             ),
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 }
