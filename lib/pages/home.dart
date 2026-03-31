@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:get/get.dart';
-
-import 'select_feature.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatelessWidget {
   final c = Get.put(CarouselGetXController());
@@ -187,7 +186,7 @@ class CarouselHomePage extends StatelessWidget {
 
         InkWell(
           onTap: () {
-            Get.to(() => FeaturePage());
+            context.push('/features');
           },
           child: Container(
               height: 40,

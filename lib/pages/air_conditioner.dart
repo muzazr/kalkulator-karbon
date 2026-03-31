@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
-import 'select_feature.dart';
+import 'package:go_router/go_router.dart';
 
 class AirConditionerCalculator extends StatelessWidget {
   const AirConditionerCalculator({super.key});
@@ -508,7 +507,7 @@ class HeaderFeaturePage extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              Get.to(() => FeaturePage());
+              context.go('/features');
             },
             child: Icon(
               Icons.arrow_back,

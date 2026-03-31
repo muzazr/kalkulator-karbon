@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:project_based_learning_eco_apps/pages/home.dart';
-
-import 'air_conditioner.dart';
-import 'electric_tool.dart';
-import 'fuel_industry.dart';
-import 'vehicle.dart';
+import 'package:go_router/go_router.dart';
 
 class FeaturePage extends StatelessWidget {
   const FeaturePage({super.key});
@@ -89,7 +83,7 @@ class HeaderFeaturePage extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              Get.to(() => HomePage());
+              context.go('/');
             },
             child: Icon(
               Icons.arrow_back,
@@ -120,30 +114,6 @@ enum CalculatorPage {
   electricTool
 }
 
-void navigateTo(CalculatorPage page) {
-  // final Map<String, Widget Function()> pageMap = {
-  //   "air_conditioner": () => AirConditionerCalculator(),
-  // };
-
-  // final pageBuilder = pageMap[pageCalculator];
-  // Get.to(() => pageBuilder!());
-
-  switch (page) {
-    case CalculatorPage.airConditioner:
-      Get.to(() => const AirConditionerCalculator());
-      break;
-    case CalculatorPage.electricTool:
-      Get.to(() => const ElectricTool());
-      break;
-    case CalculatorPage.fuelIndustry:
-      Get.to(() => const FuelIndustry());
-      break;
-    case CalculatorPage.vehicle:
-      Get.to(() => const Vehicle());
-      break;
-  }
-}
-
 class CalculatorCategory extends StatelessWidget {
   final String imagePath;
   final String nameCategory;
@@ -159,8 +129,20 @@ class CalculatorCategory extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Get.to(() => );
-        navigateTo(page);
+        switch (page) {
+          case CalculatorPage.airConditioner:
+            context.push('/calculator/air-conditioner');
+            break;
+          case CalculatorPage.fuelIndustry:
+            context.push('/calculator/fuel-industry');
+            break;
+          case CalculatorPage.vehicle:
+            context.push('/calculator/vehicle');
+            break;
+          case CalculatorPage.electricTool:
+            context.push('/calculator/electric-tool');
+            break;
+        }
       },
       child: Container(
         padding: EdgeInsets.all(5),

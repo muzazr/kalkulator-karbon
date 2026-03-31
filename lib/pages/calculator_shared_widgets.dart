@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class FeatureCalculatorHeader extends StatelessWidget {
   const FeatureCalculatorHeader({super.key});
@@ -19,7 +20,11 @@ class FeatureCalculatorHeader extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              Get.back();
+              if (context.canPop()) {
+                context.pop();
+                return;
+              }
+              context.go('/features');
             },
             child: const Icon(
               Icons.arrow_back,
