@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'calculator_shared_widgets.dart';
+import 'package:project_based_learning_eco_apps/widgets/calculator_shared_widgets.dart';
 
 final AutoDisposeChangeNotifierProvider<VehicleCalculatorController>
     vehicleControllerProvider =
