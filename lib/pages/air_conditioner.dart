@@ -133,7 +133,11 @@ class AirConditionerCalculator extends ConsumerWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => controller.hitungJejakKarbon(context),
+                  onPressed: controller.isLoading
+                      ? null
+                      : () async {
+                          await controller.hitungJejakKarbon(context);
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF018D58),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -141,14 +145,23 @@ class AirConditionerCalculator extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Hitung',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: controller.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.green,
+                          ),
+                        )
+                      : Text(
+                          'Hitung',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -171,6 +184,8 @@ class AcCalculatorController extends ChangeNotifier {
   String selectedTab = 'Hari';
   bool showResult = false;
 
+  bool isLoading = false;
+
   void updateKapasitas(double? value) {
     selectedKapasitas = value;
     notifyListeners();
@@ -187,7 +202,7 @@ class AcCalculatorController extends ChangeNotifier {
     );
   }
 
-  void hitungJejakKarbon(BuildContext context) {
+  Future<void> hitungJejakKarbon(BuildContext context) async {
     final int? jumlahAC = int.tryParse(jumlahACController.text);
     final int? durasiAC = int.tryParse(durasiACController.text);
     final int? hariAC = int.tryParse(hariACController.text);
@@ -200,6 +215,11 @@ class AcCalculatorController extends ChangeNotifier {
       return;
     }
 
+    isLoading = true;
+    notifyListeners();
+
+    await Future.delayed(const Duration(seconds: 2));
+
     final double watt = selectedKapasitas! * 746;
     final double totalWh = watt * jumlahAC * durasiAC * hariAC;
     final double kWh = totalWh / 1000;
@@ -210,6 +230,8 @@ class AcCalculatorController extends ChangeNotifier {
     hasilCO2Bulanan = co2Kg;
     selectedTab = 'Hari';
     showResult = true;
+
+    isLoading = false;
     notifyListeners();
   }
 
